@@ -1,0 +1,8 @@
+atlas_org_id            = "YOUR_ATLAS_ORGANIZATION_ID"
+atlas_database_username = "lab13_user"
+atlas_database_name     = "lab13"
+allowed_cidr            = "203.0.113.12/32"
+
+# Supply secrets via environment variables instead of this file:
+# TF_VAR_atlas_user_password=<secret>
+# MONGODB_ATLAS_PUBLIC_KEY and MONGODB_ATLAS_PRIVATE_KEY in your shell environment

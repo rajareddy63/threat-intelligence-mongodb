@@ -1,0 +1,29 @@
+services:
+  mongo1:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    networks: [mongonet]
+  mongo2:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    networks: [mongonet]
+  mongo3:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    networks: [mongonet]
+  init:
+    image: mongo:7
+    depends_on: [mongo1, mongo2, mongo3]
+    restart: "no"
+    networks: [mongonet]
+    entrypoint: >
+      bash -c "sleep 8 && mongosh --host mongo1 --eval
+      'rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"mongo1:27017\",priority:2},{_id:1,host:\"mongo2:27017\"},{_id:2,host:\"mongo3:27017\"}]})'"
+  lab:
+    build: .
+    depends_on: [mongo1, mongo2, mongo3]
+    networks: [mongonet]
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+    command: sleep infinity
+networks:
+  mongonet:

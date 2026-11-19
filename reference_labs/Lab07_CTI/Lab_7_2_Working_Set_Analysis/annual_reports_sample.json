@@ -1,0 +1,18 @@
+[
+  {
+    "report_id": "RPT-2026-000001",
+    "vendor": "Verizon",
+    "category": "Data Breaches",
+    "year": 2026,
+    "title": "2026 DBIR",
+    "source_repo": "https://github.com/jacobdjwilson/awesome-annual-security-reports/"
+  },
+  {
+    "report_id": "RPT-2026-000002",
+    "vendor": "Mandiant",
+    "category": "Global Threat Intelligence",
+    "year": 2026,
+    "title": "M-Trends 2026",
+    "source_repo": "https://github.com/jacobdjwilson/awesome-annual-security-reports/"
+  }
+]

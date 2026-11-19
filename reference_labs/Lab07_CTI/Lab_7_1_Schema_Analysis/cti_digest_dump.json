@@ -1,0 +1,185 @@
+{
+  "sources": [
+    {
+      "_id": "src_001",
+      "name": "CISA KEV & Advisories",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "reliability_score": 0.98,
+      "category": "Government",
+      "verified": true
+    },
+    {
+      "_id": "src_002",
+      "name": "CTI Digest Ransomware Tracker",
+      "url": "https://ctidigest.com/",
+      "reliability_score": 0.92,
+      "category": "Threat Feed",
+      "verified": true
+    },
+    {
+      "_id": "src_003",
+      "name": "Unverified Darkweb Paste Mirror",
+      "url": "http://paste-mirror.onion/feed",
+      "reliability_score": 0.45,
+      "category": "Darkweb OSINT",
+      "verified": false
+    },
+    {
+      "_id": "src_004",
+      "name": "Awesome Annual Security Reports",
+      "url": "https://github.com/jacobdjwilson/awesome-annual-security-reports",
+      "reliability_score": 0.96,
+      "category": "Annual Research",
+      "verified": true
+    }
+  ],
+  "actors": [
+    {
+      "_id": "act_qilin",
+      "name": "Qilin",
+      "aliases": [
+        "Agenda"
+      ],
+      "origin": "Eastern Europe",
+      "active_since": "2022-08",
+      "target_sectors": [
+        "Healthcare",
+        "Manufacturing",
+        "Government"
+      ]
+    },
+    {
+      "_id": "act_akira",
+      "name": "Akira",
+      "aliases": [
+        "Akira_v2"
+      ],
+      "origin": "Unknown",
+      "active_since": "2023-03",
+      "target_sectors": [
+        "Finance",
+        "Education",
+        "IT"
+      ]
+    },
+    {
+      "_id": "act_lockbit",
+      "name": "LockBit 3.0",
+      "aliases": [
+        "LockBit Black"
+      ],
+      "origin": "Russia-nexus",
+      "active_since": "2019-09",
+      "target_sectors": [
+        "Aviation",
+        "Logistics",
+        "Retail"
+      ]
+    }
+  ],
+  "threats": [
+    {
+      "_id": "thr_2026_001",
+      "title": "Qilin Ransomware Campaign Exploiting Edge VPN Appliances",
+      "classification": "Ransomware",
+      "severity": "Critical",
+      "cvss_score": 9.8,
+      "published_date": "2026-11-10T08:30:00Z",
+      "actor_id": "act_qilin",
+      "source_id": "src_002",
+      "cves": [
+        "CVE-2024-3400",
+        "CVE-2026-21890"
+      ],
+      "iocs": [
+        {
+          "type": "ipv4",
+          "value": "185.220.101.44",
+          "confidence": 95
+        },
+        {
+          "type": "sha256",
+          "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "confidence": 99
+        },
+        {
+          "type": "domain",
+          "value": "cdn-update-sync[.]com",
+          "confidence": 90
+        }
+      ],
+      "mitre_techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application"
+        },
+        {
+          "id": "T1486",
+          "name": "Data Encrypted for Impact"
+        }
+      ],
+      "summary": "Observed Qilin affiliates deploying Rust-based payloads post-VPN exploitation across European logistics and healthcare entities."
+    },
+    {
+      "_id": "thr_2026_002",
+      "title": "ClickFix Social Engineering Delivering Infostealers via Fake Browser Updates",
+      "classification": "Malware / Phishing",
+      "severity": "High",
+      "cvss_score": 8.1,
+      "published_date": "2026-11-12T14:15:00Z",
+      "actor_id": "act_akira",
+      "source_id": "src_002",
+      "cves": [],
+      "iocs": [
+        {
+          "type": "domain",
+          "value": "verify-human-check[.]net",
+          "confidence": 88
+        },
+        {
+          "type": "sha256",
+          "value": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "confidence": 92
+        }
+      ],
+      "mitre_techniques": [
+        {
+          "id": "T1204.001",
+          "name": "User Execution: Malicious Link"
+        },
+        {
+          "id": "T1059.001",
+          "name": "PowerShell"
+        }
+      ],
+      "summary": "Users tricked into pasting malicious PowerShell commands into Windows Run dialog leading to credential harvesting."
+    },
+    {
+      "_id": "thr_2026_003",
+      "title": "Unverified Rumor: Zero-Day in Enterprise Mail Gateway",
+      "classification": "Unverified Noise",
+      "severity": "Low",
+      "cvss_score": 3.5,
+      "published_date": "2026-11-14T19:00:00Z",
+      "actor_id": "act_lockbit",
+      "source_id": "src_003",
+      "cves": [
+        "CVE-2026-99999"
+      ],
+      "iocs": [
+        {
+          "type": "ipv4",
+          "value": "192.0.2.123",
+          "confidence": 30
+        }
+      ],
+      "mitre_techniques": [
+        {
+          "id": "T1566",
+          "name": "Phishing"
+        }
+      ],
+      "summary": "Low-confidence darkweb paste lacking reproducible PoC or verified telemetry."
+    }
+  ]
+}

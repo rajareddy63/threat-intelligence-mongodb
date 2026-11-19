@@ -1,0 +1,10 @@
+lab14.1-docker/.env
+lab14.1-docker/secrets/
+lab14.1-docker/logs/
+lab14.2-backup-benchmark/backups/
+lab14.2-backup-benchmark/results/
+*.log
+__pycache__/
+.pytest_cache/
+.terraform/
+terraform.tfstate*

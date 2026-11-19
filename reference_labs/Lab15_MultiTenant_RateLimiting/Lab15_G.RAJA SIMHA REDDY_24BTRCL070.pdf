@@ -1,0 +1,398 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 5506 >>
+stream
+BT
+/F2 14 Tf
+52 790 Td
+(Exercise 15: MongoDB Multi-Tenant SaaS) Tj
+-52 -790 Td
+/F1 1 Tf
+52 764 Td
+() Tj
+-52 -764 Td
+/F1 9 Tf
+52 759 Td
+(This project demonstrates shared-collection tenant isolation, database-backed rate limiting,) Tj
+-52 -759 Td
+/F1 9 Tf
+52 747 Td
+(and a safe migration to a dedicated database for one tenant. It is an original implementation) Tj
+-52 -747 Td
+/F1 9 Tf
+52 735 Td
+(based on the Chapter 15 lab objectives.) Tj
+-52 -735 Td
+/F1 1 Tf
+52 723 Td
+() Tj
+-52 -723 Td
+/F2 10 Tf
+52 718 Td
+(Files) Tj
+-52 -718 Td
+/F1 1 Tf
+52 699 Td
+() Tj
+-52 -699 Td
+/F1 9 Tf
+52 694 Td
+(- `lab_01_multitenant_api.py` - task create/list/update operations; every task) Tj
+-52 -694 Td
+/F1 1 Tf
+52 682 Td
+() Tj
+-52 -682 Td
+/F1 9 Tf
+52 677 Td
+(query is scoped by tenant_id. Updates require both _id and tenant_id.) Tj
+-52 -677 Td
+/F1 1 Tf
+52 665 Td
+() Tj
+-52 -665 Td
+/F1 9 Tf
+52 660 Td
+(- `lab_02_tenant_migration.py` - dry-run, idempotent migration, and rollback.) Tj
+-52 -660 Td
+/F1 1 Tf
+52 648 Td
+() Tj
+-52 -648 Td
+/F1 9 Tf
+52 643 Td
+(Migration copies data and never deletes the shared source documents.) Tj
+-52 -643 Td
+/F1 1 Tf
+52 631 Td
+() Tj
+-52 -631 Td
+/F1 9 Tf
+52 626 Td
+(- `demo_runner.py` - exercises tenant isolation, rate limiting, and repeated) Tj
+-52 -626 Td
+/F1 1 Tf
+52 614 Td
+() Tj
+-52 -614 Td
+/F1 9 Tf
+52 609 Td
+(migration against a MongoDB instance.) Tj
+-52 -609 Td
+/F1 1 Tf
+52 597 Td
+() Tj
+-52 -597 Td
+/F1 9 Tf
+52 592 Td
+(- `generate_submission_pdf.py` - creates the submission PDF from this README) Tj
+-52 -592 Td
+/F1 1 Tf
+52 580 Td
+() Tj
+-52 -580 Td
+/F1 9 Tf
+52 575 Td
+(using only the Python standard library.) Tj
+-52 -575 Td
+/F1 1 Tf
+52 563 Td
+() Tj
+-52 -563 Td
+/F2 10 Tf
+52 558 Td
+(Run locally) Tj
+-52 -558 Td
+/F1 1 Tf
+52 539 Td
+() Tj
+-52 -539 Td
+/F1 9 Tf
+52 534 Td
+(Python 3.10+ and MongoDB are required. Install dependencies:) Tj
+-52 -534 Td
+/F1 1 Tf
+52 522 Td
+() Tj
+-52 -522 Td
+/F3 8 Tf
+52 517 Td
+(python -m pip install -r requirements.txt) Tj
+-52 -517 Td
+/F1 1 Tf
+52 506 Td
+() Tj
+-52 -506 Td
+/F1 9 Tf
+52 501 Td
+(Set MONGODB_URI if MongoDB is not available at the local default, then run:) Tj
+-52 -501 Td
+/F1 1 Tf
+52 489 Td
+() Tj
+-52 -489 Td
+/F3 8 Tf
+52 484 Td
+(python demo_runner.py) Tj
+-52 -484 Td
+/F1 1 Tf
+52 473 Td
+() Tj
+-52 -473 Td
+/F3 8 Tf
+52 468 Td
+(python -m unittest discover -s tests -v) Tj
+-52 -468 Td
+/F1 1 Tf
+52 457 Td
+() Tj
+-52 -457 Td
+/F3 8 Tf
+52 452 Td
+(python generate_submission_pdf.py) Tj
+-52 -452 Td
+/F1 1 Tf
+52 441 Td
+() Tj
+-52 -441 Td
+/F1 9 Tf
+52 436 Td
+(The demo creates records for demo-acme and demo-globex in saas_app, then copies demo-acme) Tj
+-52 -436 Td
+/F1 9 Tf
+52 424 Td
+(records to tenant_demo-acme. It intentionally does not delete demo data.) Tj
+-52 -424 Td
+/F1 1 Tf
+52 412 Td
+() Tj
+-52 -412 Td
+/F2 10 Tf
+52 407 Td
+(Migration commands) Tj
+-52 -407 Td
+/F1 1 Tf
+52 388 Td
+() Tj
+-52 -388 Td
+/F3 8 Tf
+52 383 Td
+(python lab_02_tenant_migration.py --tenant customer-42 --dry-run) Tj
+-52 -383 Td
+/F1 1 Tf
+52 372 Td
+() Tj
+-52 -372 Td
+/F3 8 Tf
+52 367 Td
+(python lab_02_tenant_migration.py --tenant customer-42) Tj
+-52 -367 Td
+/F1 1 Tf
+52 356 Td
+() Tj
+-52 -356 Td
+/F3 8 Tf
+52 351 Td
+(python lab_02_tenant_migration.py --tenant customer-42 --rollback) Tj
+-52 -351 Td
+/F1 1 Tf
+52 340 Td
+() Tj
+-52 -340 Td
+/F1 9 Tf
+52 335 Td
+(The source is saas_app.tasks by default. Migration upserts on the stable task_key generated) Tj
+-52 -335 Td
+/F1 9 Tf
+52 323 Td
+(when a task is created. If a source record lacks that key, the migration stops before writing) Tj
+-52 -323 Td
+/F1 9 Tf
+52 311 Td
+(it. Rollback drops only tenant_<tenant-id>; source data remains intact.) Tj
+-52 -311 Td
+/F1 1 Tf
+52 299 Td
+() Tj
+-52 -299 Td
+/F2 10 Tf
+52 294 Td
+(Docker) Tj
+-52 -294 Td
+/F1 1 Tf
+52 275 Td
+() Tj
+-52 -275 Td
+/F3 8 Tf
+52 270 Td
+(docker build -t exercise15-multitenant:local .) Tj
+-52 -270 Td
+/F1 1 Tf
+52 259 Td
+() Tj
+-52 -259 Td
+/F3 8 Tf
+52 254 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -254 Td
+/F3 8 Tf
+52 243 Td
+(exercise15-multitenant:local) Tj
+-52 -243 Td
+/F1 1 Tf
+52 232 Td
+() Tj
+-52 -232 Td
+/F1 9 Tf
+52 227 Td
+(The image starts demo_runner.py. To run a migration command instead:) Tj
+-52 -227 Td
+/F1 1 Tf
+52 215 Td
+() Tj
+-52 -215 Td
+/F3 8 Tf
+52 210 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -210 Td
+/F3 8 Tf
+52 199 Td
+(exercise15-multitenant:local \\) Tj
+-52 -199 Td
+/F1 1 Tf
+52 188 Td
+() Tj
+-52 -188 Td
+/F3 8 Tf
+52 183 Td
+(  lab_02_tenant_migration.py --tenant customer-42 --dry-run) Tj
+-52 -183 Td
+/F1 1 Tf
+52 172 Td
+() Tj
+-52 -172 Td
+/F2 10 Tf
+52 167 Td
+(Tenant isolation and rate limiting) Tj
+-52 -167 Td
+/F1 1 Tf
+52 148 Td
+() Tj
+-52 -148 Td
+/F1 9 Tf
+52 143 Td
+(The shared tasks collection stores a tenant_id on each record. list_tasks filters by that ID,) Tj
+-52 -143 Td
+/F1 9 Tf
+52 131 Td
+(and update_task uses the combined filter {"_id": task_id, "tenant_id": tenant_id}. A task) Tj
+-52 -131 Td
+/F1 9 Tf
+52 119 Td
+(identifier from one tenant therefore cannot be used to update another tenant's task.) Tj
+-52 -119 Td
+/F1 1 Tf
+52 107 Td
+() Tj
+-52 -107 Td
+/F1 9 Tf
+52 102 Td
+(Rate-limit counters are atomically incremented in MongoDB using one document per tenant and) Tj
+-52 -102 Td
+/F1 9 Tf
+52 90 Td
+(fixed time window. The configurable default is 100 requests per 60 seconds. This is) Tj
+-52 -90 Td
+/F1 9 Tf
+52 78 Td
+(intentionally a modest-precision limiter, not a substitute for a distributed gateway in) Tj
+-52 -78 Td
+/F1 9 Tf
+52 66 Td
+(high-throughput production systems.) Tj
+-52 -66 Td
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 508 >>
+stream
+BT
+/F1 1 Tf
+52 790 Td
+() Tj
+-52 -790 Td
+/F2 10 Tf
+52 785 Td
+(Tests) Tj
+-52 -785 Td
+/F1 1 Tf
+52 766 Td
+() Tj
+-52 -766 Td
+/F1 9 Tf
+52 761 Td
+(The unit tests use mocked MongoDB collections and require no running server:) Tj
+-52 -761 Td
+/F1 1 Tf
+52 749 Td
+() Tj
+-52 -749 Td
+/F3 8 Tf
+52 744 Td
+(python -m unittest discover -s tests -v) Tj
+-52 -744 Td
+/F1 1 Tf
+52 733 Td
+() Tj
+-52 -733 Td
+/F1 9 Tf
+52 728 Td
+(Assignment reference: Chapter 15 lab description.) Tj
+-52 -728 Td
+/F1 1 Tf
+52 716 Td
+() Tj
+-52 -716 Td
+ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000272 00000 n 
+0000000340 00000 n 
+0000000486 00000 n 
+0000006044 00000 n 
+0000006190 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+6749
+%%EOF

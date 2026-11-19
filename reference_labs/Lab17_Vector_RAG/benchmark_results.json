@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-11-15T14:00:20.433033+00:00",
+  "document_count": 5000,
+  "embedding_dimensions": 384,
+  "query_count": 100,
+  "top_k": 20,
+  "metric": "cosine",
+  "results": [
+    {
+      "index": "HNSW",
+      "build_time_seconds": 0.28722899965941906,
+      "avg_query_latency_ms": 0.06754202768206596,
+      "recall_at_20_percent": 97.1
+    },
+    {
+      "index": "IVF",
+      "build_time_seconds": 0.0425395998172462,
+      "avg_query_latency_ms": 0.2537199715152383,
+      "recall_at_20_percent": 96.75
+    }
+  ]
+}

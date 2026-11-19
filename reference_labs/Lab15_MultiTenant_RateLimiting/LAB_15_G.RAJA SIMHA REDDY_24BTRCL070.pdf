@@ -1,0 +1,286 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 4527 >>
+stream
+BT
+/F2 14 Tf
+52 790 Td
+(Chapter 15 - MongoDB Multi-Tenant SaaS Labs) Tj
+-52 -790 Td
+/F1 1 Tf
+52 764 Td
+() Tj
+-52 -764 Td
+/F1 9 Tf
+52 759 Td
+(Lab 15.1: Multi-Tenant Task API and Rate Limiting) Tj
+-52 -759 Td
+/F1 1 Tf
+52 747 Td
+() Tj
+-52 -747 Td
+/F1 9 Tf
+52 742 Td
+(Lab 15.2: Tenant Data Migration and Rollback) Tj
+-52 -742 Td
+/F1 1 Tf
+52 730 Td
+() Tj
+-52 -730 Td
+/F1 9 Tf
+52 725 Td
+(Name: G RAJA SIMHA REDDY) Tj
+-52 -725 Td
+/F1 1 Tf
+52 713 Td
+() Tj
+-52 -713 Td
+/F1 9 Tf
+52 708 Td
+(USN: 24BTRCL070) Tj
+-52 -708 Td
+/F1 1 Tf
+52 696 Td
+() Tj
+-52 -696 Td
+/F1 9 Tf
+52 691 Td
+(Docker Hub URL: https://hub.docker.com/r/raja6303/exercise15-multitenant) Tj
+-52 -691 Td
+/F1 1 Tf
+52 679 Td
+() Tj
+-52 -679 Td
+/F1 9 Tf
+52 674 Td
+(Docker image: raja6303/exercise15-multitenant:latest) Tj
+-52 -674 Td
+/F1 1 Tf
+52 662 Td
+() Tj
+-52 -662 Td
+/F1 9 Tf
+52 657 Td
+(Pull image: docker pull raja6303/exercise15-multitenant:latest) Tj
+-52 -657 Td
+/F1 1 Tf
+52 645 Td
+() Tj
+-52 -645 Td
+/F2 10 Tf
+52 640 Td
+(Lab 15.1 - Multi-Tenant API) Tj
+-52 -640 Td
+/F1 1 Tf
+52 621 Td
+() Tj
+-52 -621 Td
+/F1 9 Tf
+52 616 Td
+(The task API uses one shared MongoDB collection and a tenant_id field to separate customer) Tj
+-52 -616 Td
+/F1 9 Tf
+52 604 Td
+(data. Task listing filters on the tenant. Task updates use both the task ID and tenant ID, so) Tj
+-52 -604 Td
+/F1 9 Tf
+52 592 Td
+(a tenant cannot update another tenant's record by supplying its ID.) Tj
+-52 -592 Td
+/F1 1 Tf
+52 580 Td
+() Tj
+-52 -580 Td
+/F1 9 Tf
+52 575 Td
+(The API also enforces a per-tenant request limit using atomic MongoDB counters with a fixed) Tj
+-52 -575 Td
+/F1 9 Tf
+52 563 Td
+(time window.) Tj
+-52 -563 Td
+/F1 1 Tf
+52 551 Td
+() Tj
+-52 -551 Td
+/F1 9 Tf
+52 546 Td
+(Run the demonstration with MongoDB available:) Tj
+-52 -546 Td
+/F1 1 Tf
+52 534 Td
+() Tj
+-52 -534 Td
+/F3 8 Tf
+52 529 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -529 Td
+/F3 8 Tf
+52 518 Td
+(raja6303/exercise15-multitenant:latest) Tj
+-52 -518 Td
+/F1 1 Tf
+52 507 Td
+() Tj
+-52 -507 Td
+/F1 9 Tf
+52 502 Td
+(The demo creates sample tasks for two tenants, verifies that a cross-tenant update is) Tj
+-52 -502 Td
+/F1 9 Tf
+52 490 Td
+(rejected, and displays the rate-limit decisions.) Tj
+-52 -490 Td
+/F1 1 Tf
+52 478 Td
+() Tj
+-52 -478 Td
+/F2 10 Tf
+52 473 Td
+(Lab 15.2 - Tenant Migration) Tj
+-52 -473 Td
+/F1 1 Tf
+52 454 Td
+() Tj
+-52 -454 Td
+/F1 9 Tf
+52 449 Td
+(The migration copies one tenant's task records from saas_app.tasks into that tenant's) Tj
+-52 -449 Td
+/F1 9 Tf
+52 437 Td
+(dedicated database. It supports a dry run, repeatable upsert migration using task_key, and) Tj
+-52 -437 Td
+/F1 9 Tf
+52 425 Td
+(rollback that drops only the dedicated database. The shared source documents are preserved.) Tj
+-52 -425 Td
+/F1 1 Tf
+52 413 Td
+() Tj
+-52 -413 Td
+/F1 9 Tf
+52 408 Td
+(Run a dry run, perform the migration, then roll back if required:) Tj
+-52 -408 Td
+/F1 1 Tf
+52 396 Td
+() Tj
+-52 -396 Td
+/F3 8 Tf
+52 391 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -391 Td
+/F3 8 Tf
+52 380 Td
+(raja6303/exercise15-multitenant:latest lab_02_tenant_migration.py --tenant customer-42) Tj
+-52 -380 Td
+/F3 8 Tf
+52 369 Td
+(--dry-run) Tj
+-52 -369 Td
+/F1 1 Tf
+52 358 Td
+() Tj
+-52 -358 Td
+/F3 8 Tf
+52 353 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -353 Td
+/F3 8 Tf
+52 342 Td
+(raja6303/exercise15-multitenant:latest lab_02_tenant_migration.py --tenant customer-42) Tj
+-52 -342 Td
+/F1 1 Tf
+52 331 Td
+() Tj
+-52 -331 Td
+/F3 8 Tf
+52 326 Td
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+-52 -326 Td
+/F3 8 Tf
+52 315 Td
+(raja6303/exercise15-multitenant:latest lab_02_tenant_migration.py --tenant customer-42) Tj
+-52 -315 Td
+/F3 8 Tf
+52 304 Td
+(--rollback) Tj
+-52 -304 Td
+/F1 1 Tf
+52 293 Td
+() Tj
+-52 -293 Td
+/F2 10 Tf
+52 288 Td
+(Verification) Tj
+-52 -288 Td
+/F1 1 Tf
+52 269 Td
+() Tj
+-52 -269 Td
+/F1 9 Tf
+52 264 Td
+(The Docker image built successfully and was pushed to Docker Hub. All 7 unit tests passed,) Tj
+-52 -264 Td
+/F1 9 Tf
+52 252 Td
+(including tenant-scoped updates, per-tenant rate limits, dry-run behavior, migration) Tj
+-52 -252 Td
+/F1 9 Tf
+52 240 Td
+(repeatability, missing migration-key validation, and rollback targeting.) Tj
+-52 -240 Td
+/F1 1 Tf
+52 228 Td
+() Tj
+-52 -228 Td
+/F1 9 Tf
+52 223 Td
+(Unit tests use mocked MongoDB collections and do not require a live database. The) Tj
+-52 -223 Td
+/F1 9 Tf
+52 211 Td
+(demonstration and migration commands require a MongoDB server.) Tj
+-52 -211 Td
+/F1 1 Tf
+52 199 Td
+() Tj
+-52 -199 Td
+ET
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000191 00000 n 
+0000000266 00000 n 
+0000000334 00000 n 
+0000000480 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+5059
+%%EOF

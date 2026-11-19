@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Exercise 13 — MongoDB Deployment</title>
+<style>
+@page {
+  size: A4;
+  margin: 16mm 17mm 20mm;
+  @bottom-left { content: "Exercise 13 · MongoDB Deployment"; color: #555; font: 8pt Arial, sans-serif; }
+  @bottom-right { content: counter(page); color: #555; font: 8pt Arial, sans-serif; }
+}
+* { box-sizing: border-box; }
+body { color: #111; font: 9.5pt/1.42 Arial, Helvetica, sans-serif; }
+h1, h2, h3 { color: #111; line-height: 1.25; }
+h1 { font-size: 17pt; }
+h2 { font-size: 13pt; margin-top: 0; border-bottom: 1px solid #aaa; padding-bottom: 4px; }
+h3 { font-size: 10.5pt; margin: 13px 0 5px; }
+p { margin: 7px 0; }
+ul, ol { margin: 5px 0; padding-left: 22px; }
+li { margin-bottom: 3px; }
+code { font: 8.5pt Consolas, "Courier New", monospace; color: #222; }
+pre { padding: 8px 10px; background: #f5f5f5; border: 1px solid #ccc; white-space: pre-wrap; overflow-wrap: anywhere; font: 8pt/1.4 Consolas, "Courier New", monospace; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9pt; }
+th { background: #eee; color: #111; text-align: left; }
+th, td { padding: 6px 7px; border: 1px solid #bbb; vertical-align: top; }
+.cover { height: 255mm; padding: 0; background: #fff; color: #111; position: relative; }
+.cover h1, .cover h2, .cover p { color: #111; border: none; }
+.cover .eyebrow { color: #111; letter-spacing: 0; font-size: 10pt; font-weight: bold; margin: 0 0 10px; }
+.cover h1 { font-size: 12pt; margin: 0 0 7px; }
+.cover h2 { font-size: 10pt; font-weight: normal; margin: 0 0 12px; }
+.cover .rule { display: none; }
+.cover .meta { position: static; font-size: 9pt; color: #111; margin-top: 12px; }
+.pill { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 8pt; font-weight: bold; }
+.prepared { background: #fff2cc; color: #765500; }
+.notrun { background: #fce5dc; color: #8a3616; }
+.callout { padding: 8px 10px; background: #f5f5f5; border-left: 3px solid #888; margin: 9px 0; }
+.warning { background: #f5f5f5; border-left-color: #555; }
+.small { color: #536477; font-size: 8.5pt; }
+figure { margin: 10px 0; page-break-inside: avoid; }
+figure img { display: block; width: 100%; max-height: 125mm; object-fit: contain; object-position: top; border: 1px solid #bbb; }
+figcaption { margin-top: 5px; color: #536477; font-size: 8.5pt; }
+.break { page-break-before: always; }
+.toc li { margin: 6px 0; }
+.status { color: #905214; font-weight: bold; }
+a { color: #164a8a; }
+.demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; align-items: start; }
+.demo-grid figure { margin-top: 5px; }
+.demo-grid img { max-height: 70mm; object-fit: contain; }
+</style>
+</head>
+<body>
+<section class="cover">
+<p class="eyebrow">Chapter 13 · MongoDB Deployment</p>
+<h1>Exercise 13: Deploying MongoDB with Containers and the Cloud</h1>
+<h2>Lab 13.1 (Docker Replica Set) and Lab 13.2 (Kubernetes StatefulSet)</h2>
+<div class="rule"></div>
+<p>Name: G.RAJA SIMHA REDDY<br>USN: 24BTRCL070</p>
+<p>Docker Hub URL: <a href="https://hub.docker.com/r/raja6303/mongodb-lab13-demo">https://hub.docker.com/r/raja6303/mongodb-lab13-demo</a></p>
+<div class="meta">Submission includes Docker Compose replica set, Prometheus monitoring, Kubernetes manifests, Atlas Terraform configuration, and verified test results.<br>Report date: November 14, 2026</div>
+</section>
+
+<section class="break">
+<h2>Demonstration output</h2>
+<p><strong>Docker Compose replica set:</strong> three MongoDB nodes healthy; PyMongo insert/read passed; controlled election changed primary from <code>mongo1</code> to <code>mongo2</code> and the follow-up read/write passed.</p>
+<p><strong>Monitoring:</strong> Prometheus target was healthy and <code>mongodb_up=1</code>. <strong>Docker Hub:</strong> image tag <code>1.0.0</code> was pushed with approval and verified in the public repository.</p>
+<div class="demo-grid">
+<figure>
+<img src="../screenshots/prometheus-targets.png" alt="Prometheus target-health page showing the MongoDB exporter scrape target up">
+<figcaption>Live Prometheus target-health page.</figcaption>
+</figure>
+<figure>
+<img src="../screenshots/dockerhub-repository.png" alt="Public Docker Hub repository page for raja6303/mongodb-lab13-demo">
+<figcaption>Public Docker Hub repository after image push.</figcaption>
+</figure>
+</div>
+<div class="callout"><strong>Other checks:</strong> Kubernetes manifests passed static schema validation; cluster deployment was not tested because no Kubernetes context exists. Terraform formatting, initialization, and validation passed; no cloud plan or apply was run.</div>
+</section>
+
+<section class="break">
+<h2>Submission status and evidence</h2>
+<div class="callout warning"><strong>Honest execution note.</strong> Docker Compose, the three-node replica-set election, PyMongo read/write, controlled primary failover, and Prometheus scraping were exercised successfully. All three Kubernetes manifests passed static schema validation, but there is no Kubernetes context, so no cluster deployment/resiliency test was run. Terraform formatting, initialization, and <code>terraform validate</code> passed; no plan or apply was run. After explicit approval, the demo image was pushed to Docker Hub; Docker reported success and the remote <code>1.0.0</code> manifest was verified. No Atlas resources were created.</div>
+<table>
+<tr><th>Deliverable</th><th>Result</th><th>Evidence/qualification</th></tr>
+<tr><td>Docker Compose: three MongoDB nodes, keyfile, persistent volumes</td><td><span class="pill prepared">PASS</span></td><td>All three nodes report healthy; distinct named data volumes and keyfile volume used. Loopback ports 37017–37019 avoid the existing host mongod on 27017.</td></tr>
+<tr><td>Replica set election, members, PyMongo read/write, controlled failover</td><td><span class="pill prepared">PASS</span></td><td>One primary and two secondaries observed; insert/read succeeded. Controlled stepdown elected mongo2 after mongo1; post-election write/read succeeded.</td></tr>
+<tr><td>Prometheus and MongoDB exporter</td><td><span class="pill prepared">PASS</span></td><td>Exporter reported <code>mongodb_up=1</code>; Prometheus target health was up and the live query returned 1.</td></tr>
+<tr><td>Kubernetes StatefulSet and recovery</td><td><span class="pill prepared">SCHEMA PASS; NOT DEPLOYED</span></td><td>All three manifests pass strict static validation. <code>kubectl</code> has no configured context, so rollout and pod recovery remain untested.</td></tr>
+<tr><td>MongoDB Atlas M0</td><td><span class="pill prepared">VALIDATED; NOT APPLIED</span></td><td>Terraform init, format, and validate pass. No credentials or cloud resources supplied; no plan/apply run.</td></tr>
+<tr><td>Demo image and Docker Hub submission</td><td><span class="pill prepared">PUSHED; VERIFIED</span></td><td><code>raja6303/mongodb-lab13-demo:1.0.0</code> pushed successfully after approval; public repository and tag confirmed by Docker Hub API. Linux image digest: <code>sha256:3af3c7ba516f6fc80ce27cf20aa859f09623c621dc71fc6e379fa660e8306d02</code>. Push index digest: <code>sha256:442ed269798d4e1bed826afdfc0821e152a14a75f2a3371b8fda954ea69cb867</code>. <a href="https://hub.docker.com/r/raja6303/mongodb-lab13-demo">Docker Hub repository</a>.</td></tr>
+<tr><td>Real execution screenshots</td><td><span class="pill prepared">CAPTURED</span></td><td>Genuine Prometheus target-health and public Docker Hub repository screenshots captured. A PowerShell terminal screenshot was not available from this automation surface.</td></tr>
+</table>
+</section>
+
+<section class="break">
+<h2>Table of contents</h2>
+<ol class="toc">
+<li>Objectives</li><li>Software and prerequisites</li><li>Lab 13.1 — Docker Compose replica set</li>
+<li>Keyfile authentication and initialization</li><li>Replica-set verification and PyMongo test</li>
+<li>Controlled failover and Prometheus</li><li>Lab 13.2 — Kubernetes StatefulSet</li>
+<li>Deployment, storage, and pod resiliency</li><li>Atlas M0 Terraform</li>
+<li>Commands, results, and screenshot evidence</li><li>Conclusion and references</li>
+</ol>
+<h2>1. Objectives</h2>
+<ul>
+<li>Prepare an authenticated three-member MongoDB replica set using Docker Compose.</li>
+<li>Demonstrate replica-set initialization, member state inspection, PyMongo writes and reads, and an intentional primary election.</li>
+<li>Prepare Prometheus and a MongoDB exporter for basic monitoring.</li>
+<li>Configure Kubernetes stable identities, persistent claims, keyfile setup, health probes, and automated replica-set initialization.</li>
+<li>Prepare an Atlas M0 infrastructure-as-code configuration with a least-privilege database user and restricted network access.</li>
+<li>Build a reproducible demo image and provide an accurate submission report without overstating tests or uploading without approval.</li>
+</ul>
+<h2>2. Software and prerequisites</h2>
+<ul><li>Windows 10/11, PowerShell 5.1+, Docker Desktop with Linux containers, Docker Compose v2.</li><li>Optional Activity 13.1: Docker image access for Prometheus and Percona's MongoDB exporter.</li><li>Kubernetes activity: a local Kubernetes context (for example Docker Desktop Kubernetes), `kubectl`, dynamic default StorageClass, and sufficient CPU/memory.</li><li>Atlas activity: Terraform 1.5+, Atlas organization ID and API keys supplied privately through shell environment variables.</li></ul>
+<p>This machine had Docker CLI 29.8.2, Docker Desktop, <code>kubectl</code> 1.36.1, and Terraform 1.9.8 in a temporary container for non-provisioning validation. The MongoDB port 27017 was occupied by an existing host <code>mongod</code> process, which was left untouched; this lab therefore uses its own loopback ports 37017–37019. No Kubernetes context exists.</p>
+</section>
+
+<section class="break">
+<h2>3. Lab 13.1 — Docker Compose</h2>
+<p><code>lab13.1-docker/docker-compose.yml</code> defines three <code>mongo:7.0</code> members (<code>mongo1</code>–<code>mongo3</code>), replica-set name <code>rs0</code>, dedicated named data volumes, container health checks, and a one-shot replica-set initializer. Each published MongoDB port binds only to localhost. Compose dependencies ensure that the keyfile volume is prepared before any MongoDB node starts and that the initializer waits for healthy nodes.</p>
+<table><tr><th>Node</th><th>Container port</th><th>Host loopback port</th><th>Persistent volume</th></tr>
+<tr><td>mongo1</td><td>27017</td><td>37017</td><td>mongo1-data</td></tr>
+<tr><td>mongo2</td><td>27017</td><td>37018</td><td>mongo2-data</td></tr>
+<tr><td>mongo3</td><td>27017</td><td>37019</td><td>mongo3-data</td></tr></table>
+<h3>4. Keyfile authentication and secrets</h3>
+<p><code>Initialize-Lab.ps1</code> uses the operating-system cryptographic random-number generator to create a 756-byte MongoDB internal keyfile and a random 256-bit root password locally. Credentials are excluded from Git. The Alpine setup container stages the key into a named Docker volume, changes its owner to MongoDB UID 999 and sets mode <code>0400</code>. This avoids relying on Windows bind-mount POSIX permissions. MongoDB nodes use <code>--auth</code> and <code>--keyFile</code>; the key secures member-to-member authentication.</p>
+<p>MongoDB's initial root user is configured by the image environment on each new data volume. For monitoring, the initializer creates a separate exporter account with <code>clusterMonitor</code> and read-only admin roles. Generated credentials use URI-safe hex characters. These local lab credentials are not production secrets.</p>
+<h3>5. Replica-set initialization</h3>
+<p>The initialization container connects to <code>mongo1</code>, idempotently calls <code>replSetInitiate</code> with all three Compose DNS names, and waits for exactly one primary and two secondaries. Election may choose any eligible member as primary. The three persistent volumes allow data to survive container recreation; `docker compose down -v` is deliberately not part of the testing scripts.</p>
+<h3>6. Replica-set verification and PyMongo</h3>
+<p>The custom Python 3.12 image installs pinned PyMongo 4.13.2 and contains a client that exposes <code>status</code>, <code>write-read</code>, and <code>failover</code> actions. It uses a replica-set-aware seed list, authentication against <code>admin</code>, a bounded server-selection timeout, and retryable writes. The write/read action replaces and reads a deterministic example document.</p>
+<pre>docker compose up -d mongo1 mongo2 mongo3
+docker compose --profile init run --rm replica-set-init
+docker compose run --rm client status
+docker compose run --rm client write-read</pre>
+<p><strong>Observed result:</strong> PASS. Docker reported all three MongoDB nodes healthy. PyMongo reported <code>mongo1:27017 PRIMARY</code>, <code>mongo2:27017 SECONDARY</code>, and <code>mongo3:27017 SECONDARY</code>. The deterministic example document was inserted and read back with its expected message.</p>
+</section>
+
+<section class="break">
+<h2>7. Controlled failover</h2>
+<p>Run <code>docker compose run --rm client failover</code>. The client records the existing primary with <code>hello</code>, sends a forced <code>replSetStepDown</code> to that node, tolerates the expected connection interruption, waits for a different primary, then verifies a document write/read through the replica-set-aware driver. A short write interruption is expected while a new primary is elected; the operation has a 120-second default timeout. The controlled stepdown does not remove a member or erase its volume.</p>
+<p><strong>Observed result:</strong> PASS. The controlled stepdown changed the primary from <code>mongo1:27017</code> to <code>mongo2:27017</code>; the client then completed another write/read. All three member containers remained healthy.</p>
+<h2>8. Activity 13.1 — Prometheus monitoring</h2>
+<p>The optional Compose monitoring profile adds a MongoDB exporter authenticated by its separate read-only monitoring user and a Prometheus server that scrapes it every 15 seconds. Only loopback addresses publish Prometheus (<code>9090</code>) and exporter (<code>9216</code>) ports.</p>
+<pre>docker compose --profile monitoring up -d
+# Prometheus UI: http://localhost:9090
+# Exporter metrics: http://localhost:9216/metrics
+# Example Prometheus query: mongodb_up</pre>
+<p><strong>Observed result:</strong> PASS. The first exporter run exposed its default direct-connect setting, which is invalid with a multi-host replica-set URI. After setting <code>--no-mongodb.direct-connect</code>, <code>http://localhost:9216/metrics</code> reported <code>mongodb_up{cluster_role="mongod"} 1</code>; Prometheus reported target health <code>up</code> and query result <code>mongodb_up = 1</code>. The live target view is reproduced in the genuine screenshot below.</p>
+<h2>9. Lab 13.2 — Kubernetes StatefulSet</h2>
+<p><code>mongo-headless-svc.yaml</code> defines a headless Service. StatefulSet DNS names are <code>mongo-0.mongo</code>, <code>mongo-1.mongo</code>, and <code>mongo-2.mongo</code> in namespace <code>mongo-lab</code>. <code>mongo-statefulset.yaml</code> defines three MongoDB pods, three per-pod 5 GiB ReadWriteOnce PVCs, a source keyfile Secret, and an init container that stages the keyfile with UID 999 and mode 0400. Startup, readiness, and liveness probes use MongoDB's local ping command.</p>
+<p>A separate MongoDB initialization Job configures <code>rs0</code> with all three stable pod addresses and waits for the expected primary/secondary membership. The guarded PowerShell deployment script first checks for a configured Kubernetes context, then creates the namespace and Secrets without printing their contents, applies the Service and StatefulSet, and waits for the Job.</p>
+<pre>kubectl config get-contexts
+.\scripts\Deploy-Lab.ps1
+kubectl rollout status statefulset/mongo -n mongo-lab --timeout=10m
+kubectl get pods,svc,pvc -n mongo-lab -o wide</pre>
+</section>
+
+<section class="break">
+<h2>10. StatefulSet resiliency</h2>
+<p>A pod recovery demonstration deletes one pod while preserving its PVC. The StatefulSet should recreate the same ordinal, reattach its claim, and the MongoDB member should rejoin using its stable DNS identity:</p>
+<pre>kubectl delete pod mongo-1 -n mongo-lab
+kubectl wait --for=condition=Ready pod/mongo-1 -n mongo-lab --timeout=5m
+kubectl get pod mongo-1 -n mongo-lab -o wide
+# Confirm the rejoined member using authenticated rs.status().</pre>
+<p><strong>Observed result:</strong> strict Kubernetes schema validation passed for all three manifests (3 valid, 0 invalid). Runtime deployment and pod-recovery testing were not possible because <code>kubectl</code> has no current context. No pod was created or deleted, and no recovery is claimed.</p>
+<div class="callout warning"><strong>Data-safety note:</strong> inspect the current context before applying manifests. PersistentVolumeClaims retain database data. Cleanup or PVC deletion must be done deliberately and is omitted from automated scripts.</div>
+<h2>11. MongoDB Atlas M0 Terraform</h2>
+<p>The Terraform configuration defines the Atlas provider, dedicated project, AWS Mumbai M0 replica set, scoped database user, and an Atlas project IP access-list entry. Unlike the permissive training reference, the validated CIDR variable rejects <code>0.0.0.0/0</code>. The database user has read/write only on the lab database. The connection output is a URI template and does not interpolate or disclose a password.</p>
+<p><code>terraform.tfvars.example</code> contains placeholders only. Supply Atlas API keys using private environment variables, set the database password using <code>TF_VAR_atlas_user_password</code>, and use your actual client CIDR. No Atlas password/API key is embedded. No cloud resource was created and no billable action was taken.</p>
+<pre>terraform init
+terraform validate
+terraform plan
+# Review and obtain explicit authorization before terraform apply.</pre>
+<p><strong>Observed result:</strong> Terraform 1.9.8 <code>fmt -check</code>, <code>init -backend=false</code>, and <code>validate</code> all passed; provider <code>mongodb/mongodbatlas v1.41.2</code> was downloaded into the ignored local cache and a lockfile was generated. No organization credentials or real variables were supplied. No cloud plan or apply was run, so no Atlas resource was created or charged.</p>
+<h2>12. Demo image and Docker Hub</h2>
+<p>The Dockerfile creates a Python/PyMongo demonstration image with a default status action. The local image <code>mongodb-lab13-demo:1.0.0</code> was built and used for the status, read/write, and failover tests. After explicit approval to create a public repository and publish the image, <code>docker push raja6303/mongodb-lab13-demo:1.0.0</code> completed successfully. Subsequent <code>docker manifest inspect</code> and Docker Hub REST API checks confirmed the public repository and tag. Repository: <a href="https://hub.docker.com/r/raja6303/mongodb-lab13-demo">https://hub.docker.com/r/raja6303/mongodb-lab13-demo</a>. Tag: <code>1.0.0</code>, pushed November 14, 2026. Docker Hub Linux image digest: <code>sha256:3af3c7ba516f6fc80ce27cf20aa859f09623c621dc71fc6e379fa660e8306d02</code>; pushed image-index digest: <code>sha256:442ed269798d4e1bed826afdfc0821e152a14a75f2a3371b8fda954ea69cb867</code>.</p>
+</section>
+
+<section class="break">
+<h2>13. Important commands and execution results</h2>
+<table><tr><th>Check</th><th>Result</th><th>Note</th></tr>
+<tr><td>Docker CLI/Desktop</td><td>Available</td><td>Docker CLI 29.8.2; Desktop daemon started. Existing host mongod on 27017 was not disturbed.</td></tr>
+<tr><td>Compose replica-set health/election</td><td>PASS</td><td>Three members healthy; one primary and two secondaries.</td></tr>
+<tr><td>PyMongo document write/read</td><td>PASS</td><td>Inserted/read document id <code>exercise-13-demo</code>.</td></tr>
+<tr><td>Controlled primary failover</td><td>PASS</td><td>mongo1 primary stepped down; mongo2 elected; post-election write/read passed.</td></tr>
+<tr><td>Prometheus exporter scrape</td><td>PASS</td><td>Target health up; <code>mongodb_up</code> equals 1.</td></tr>
+<tr><td>Kubernetes client installed</td><td>Observed</td><td>kubectl 1.36.1.</td></tr>
+<tr><td>Kubernetes manifest schema</td><td>PASS (static)</td><td>3 resources valid; no cluster context, so runtime tests not run.</td></tr>
+<tr><td>Kubernetes deployment/resiliency</td><td class="status">Not run</td><td>No configured Kubernetes context.</td></tr>
+<tr><td>Terraform format/init/validate</td><td>PASS</td><td>Terraform 1.9.8; Atlas provider initialized; no cloud plan or apply.</td></tr>
+<tr><td>Docker image build</td><td>PASS</td><td>Local tag <code>mongodb-lab13-demo:1.0.0</code>.</td></tr>
+<tr><td>Docker Hub push/remote manifest</td><td>PASS</td><td>Public repository and tag <code>1.0.0</code> pushed with approval and verified by manifest digest.</td></tr>
+</table>
+<h3>Actual execution screenshots</h3>
+<figure>
+<img src="../screenshots/prometheus-targets.png" alt="Prometheus target-health page showing the MongoDB exporter scrape target up">
+<figcaption>Live deployment screenshot captured from Prometheus at <code>http://localhost:9090/targets</code>; MongoDB exporter target was 1/1 up.</figcaption>
+</figure>
+<figure>
+<img src="../screenshots/dockerhub-repository.png" alt="Public Docker Hub repository page for raja6303/mongodb-lab13-demo">
+<figcaption>Public Docker Hub repository page captured after the approved image push. Repository tag and digest were independently verified through the Docker Hub API and registry manifest.</figcaption>
+</figure>
+<div class="callout">No terminal screenshot was captured by the available automation surface. The actual command output and measured test results are recorded above; no mock terminal image is substituted.</div>
+<h3>Project files</h3>
+<ul><li><code>lab13.1-docker/</code> — Compose, Dockerfile, Python client, initializers, scripts, monitoring config.</li>
+<li><code>lab13.2-kubernetes/</code> — headless service, StatefulSet, replica initialization Job, deployment and verification scripts.</li>
+<li><code>terraform/</code> — Atlas project, M0 cluster, least-privilege user, scoped IP list, variables and example values.</li></ul>
+<h2>14. Conclusion</h2>
+<p>The Docker exercise ran successfully on a live three-member replica set: authentication, health checks, PyMongo writes/reads, controlled primary failover, and Prometheus metrics were verified. The demo image was published to Docker Hub after user approval, and its remote manifest digest was checked. All Kubernetes manifests passed strict static schema validation, but deployment/resiliency tests remain untested because no context is configured. Atlas Terraform formatting, initialization, and validation passed, but no plan/apply was run. The project keeps generated secrets out of source, preserves the existing host mongod and database volumes, and restricts Atlas access to a caller-supplied CIDR.</p>
+<h3>References</h3>
+<ul><li><a href="https://github.com/sujeetjagtap/NoSQL-Databases-using-MongoDB/blob/main/chapter-13/docker-compose-production.yml">Professor's chapter 13 Docker Compose reference</a>.</li>
+<li><a href="https://github.com/sujeetjagtap/NoSQL-Databases-using-MongoDB/blob/main/chapter-13/main.tf">Professor's chapter 13 MongoDB Atlas Terraform reference</a>.</li>
+<li><a href="https://github.com/sujeetjagtap/NoSQL-Databases-using-MongoDB/tree/main/chapter-13">Professor's complete chapter 13 repository</a>.</li></ul>
+<p class="small">Prepared for Exercise 13 · MongoDB deployment · Evidence status reported accurately as of November 14, 2026.</p>
+</section>
+</body>
+</html>

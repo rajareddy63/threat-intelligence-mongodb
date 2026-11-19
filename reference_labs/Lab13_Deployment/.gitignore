@@ -1,0 +1,10 @@
+.env
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+terraform.tfvars
+*.tfplan
+lab13.1-docker/keyfile
+lab13.1-docker/secrets/
+__pycache__/
+.pytest_cache/

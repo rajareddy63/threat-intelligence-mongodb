@@ -1,0 +1,5 @@
+operation,mean_ms,notes
+mongodb_transaction_lookup,1120.61,actual local Docker exec timing
+cassandra_user_history,1307.06,actual local Docker exec timing
+neo4j_graph_traversal,3979.53,actual local Docker exec timing
+combined_fraud_query,6688.37,actual local Docker exec timing

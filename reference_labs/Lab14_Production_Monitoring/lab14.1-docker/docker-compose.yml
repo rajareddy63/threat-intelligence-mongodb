@@ -1,0 +1,158 @@
+services:
+  mongo1:
+    image: mongo:7.0
+    restart: unless-stopped
+    hostname: mongo1
+    ports:
+      - "127.0.0.1:${MONGO_PORT_1:-37117}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    command:
+      - bash
+      - -ec
+      - cp /run/secrets/mongo-keyfile /tmp/mongo-keyfile && chown mongodb:mongodb /tmp/mongo-keyfile && chmod 400 /tmp/mongo-keyfile && exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /tmp/mongo-keyfile
+    volumes:
+      - mongo1-data:/data/db
+      - ./secrets/keyfile:/run/secrets/mongo-keyfile:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 2)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks: [mongo-net]
+
+  mongo2:
+    image: mongo:7.0
+    restart: unless-stopped
+    hostname: mongo2
+    ports:
+      - "127.0.0.1:${MONGO_PORT_2:-37118}:27017"
+    command:
+      - bash
+      - -ec
+      - cp /run/secrets/mongo-keyfile /tmp/mongo-keyfile && chown mongodb:mongodb /tmp/mongo-keyfile && chmod 400 /tmp/mongo-keyfile && exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /tmp/mongo-keyfile
+    volumes:
+      - mongo2-data:/data/db
+      - ./secrets/keyfile:/run/secrets/mongo-keyfile:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 2)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks: [mongo-net]
+
+  mongo3:
+    image: mongo:7.0
+    restart: unless-stopped
+    hostname: mongo3
+    ports:
+      - "127.0.0.1:${MONGO_PORT_3:-37119}:27017"
+    command:
+      - bash
+      - -ec
+      - cp /run/secrets/mongo-keyfile /tmp/mongo-keyfile && chown mongodb:mongodb /tmp/mongo-keyfile && chmod 400 /tmp/mongo-keyfile && exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /tmp/mongo-keyfile
+    volumes:
+      - mongo3-data:/data/db
+      - ./secrets/keyfile:/run/secrets/mongo-keyfile:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 2)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks: [mongo-net]
+
+  replica-set-init:
+    image: mongo:7.0
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    volumes:
+      - ./scripts:/scripts:ro
+    command:
+      - bash
+      - -ec
+      - |
+        until mongosh --host mongo1 --username "$$MONGO_INITDB_ROOT_USERNAME" --password "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval 'db.adminCommand({ping:1}).ok' >/dev/null 2>&1; do sleep 2; done
+        mongosh --host mongo1 --username "$$MONGO_INITDB_ROOT_USERNAME" --password "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet /scripts/init-replica-set.js
+    networks: [mongo-net]
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: lab14.1-docker/Dockerfile
+    image: raja6303/mongodb-exercise14:1.0.0
+    restart: unless-stopped
+    depends_on:
+      replica-set-init:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${DASHBOARD_PORT:-8080}:8080"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+      APP_DATABASE: ${APP_DATABASE:-lab14}
+      APP_COLLECTION: ${APP_COLLECTION:-orders}
+      MONITOR_INTERVAL_SECONDS: ${MONITOR_INTERVAL_SECONDS:-30}
+      CACHE_WARNING_PERCENT: ${CACHE_WARNING_PERCENT:-80}
+      REPLICATION_LAG_WARNING_SECONDS: ${REPLICATION_LAG_WARNING_SECONDS:-10}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      MONITOR_LOG_PATH: /logs/monitor.jsonl
+      BENCHMARK_RESULTS_PATH: /results/benchmark.json
+    volumes:
+      - ./logs:/logs
+      - ../lab14.2-backup-benchmark/results:/results
+    command: ["dashboard"]
+    networks: [mongo-net]
+
+  backup-scheduler:
+    image: mongo:7.0
+    profiles: [backup]
+    restart: unless-stopped
+    depends_on:
+      replica-set-init:
+        condition: service_completed_successfully
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+      APP_DATABASE: ${APP_DATABASE:-lab14}
+      BACKUP_DIR: /backups
+      BACKUP_RETENTION_DAYS: 7
+      BACKUP_INTERVAL_SECONDS: 3600
+    volumes:
+      - ../lab14.2-backup-benchmark/scripts:/scripts:ro
+      - ../lab14.2-backup-benchmark/backups:/backups
+    command: ["bash", "/scripts/backup-scheduler.sh"]
+    networks: [mongo-net]
+
+  webhook-sink:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: raja6303/mongodb-exercise14:1.0.0
+    profiles: [testing]
+    ports:
+      - "127.0.0.1:8099:8099"
+    volumes:
+      - ./logs:/logs
+    command: ["webhook"]
+    networks: [mongo-net]
+
+networks:
+  mongo-net:
+    driver: bridge
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:

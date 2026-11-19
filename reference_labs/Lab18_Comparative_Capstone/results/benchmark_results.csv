@@ -1,0 +1,13 @@
+database,workload,median_latency_ms,median_insert_throughput_records_per_second,successful_runs,requested_runs,dataset_records,status
+mongodb,threat_history,2.862,,10,10,100000,measured; partial/unconfirmed load
+mongodb,target_and_spread,6.448,,10,10,100000,measured; partial/unconfirmed load
+mongodb,daily_volume,8.118,,10,10,100000,measured; partial/unconfirmed load
+mongodb,insert_throughput,,2688.99,10,10,100000,measured; partial/unconfirmed load
+cassandra,threat_history,16.749,,10,10,100000,measured; partial/unconfirmed load
+cassandra,target_and_spread,311.849,,10,10,100000,measured; partial/unconfirmed load
+cassandra,daily_volume,30.983,,10,10,100000,measured; partial/unconfirmed load
+cassandra,insert_throughput,,167.45,10,10,100000,measured; partial/unconfirmed load
+neo4j,threat_history,28.597,,10,10,100000,measured; partial/unconfirmed load
+neo4j,target_and_spread,77.03,,10,10,100000,measured; partial/unconfirmed load
+neo4j,daily_volume,26.742,,10,10,100000,measured; partial/unconfirmed load
+neo4j,insert_throughput,,301.94,10,10,100000,measured; partial/unconfirmed load

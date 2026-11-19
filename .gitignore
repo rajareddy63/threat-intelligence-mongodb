@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+*.log
+
+*.backup
+*.bak
+
+
+HANDOFF_FOR_CHATGPT.md
+
+HANDOFF_FOR_CHATGPT.md

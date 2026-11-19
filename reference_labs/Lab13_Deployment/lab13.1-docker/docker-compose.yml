@@ -1,0 +1,160 @@
+services:
+  keyfile-setup:
+    image: alpine:3.20
+    restart: "no"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        test -s /source/keyfile
+        cp /source/keyfile /shared/keyfile
+        chown 999:999 /shared/keyfile
+        chmod 0400 /shared/keyfile
+        ls -l /shared/keyfile
+    volumes:
+      - ./secrets:/source:ro
+      - mongo-keyfile:/shared
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  mongo1:
+    image: mongo:7.0
+    hostname: mongo1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--auth", "--keyFile", "/run/mongo-keyfile/keyfile"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    ports:
+      - "127.0.0.1:${MONGO1_HOST_PORT:-37017}:27017"
+    volumes:
+      - mongo1-data:/data/db
+      - mongo-keyfile:/run/mongo-keyfile:ro
+    depends_on:
+      keyfile-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  mongo2:
+    image: mongo:7.0
+    hostname: mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--auth", "--keyFile", "/run/mongo-keyfile/keyfile"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    ports:
+      - "127.0.0.1:${MONGO2_HOST_PORT:-37018}:27017"
+    volumes:
+      - mongo2-data:/data/db
+      - mongo-keyfile:/run/mongo-keyfile:ro
+    depends_on:
+      keyfile-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  mongo3:
+    image: mongo:7.0
+    hostname: mongo3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--auth", "--keyFile", "/run/mongo-keyfile/keyfile"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    ports:
+      - "127.0.0.1:${MONGO3_HOST_PORT:-37019}:27017"
+    volumes:
+      - mongo3-data:/data/db
+      - mongo-keyfile:/run/mongo-keyfile:ro
+    depends_on:
+      keyfile-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  replica-set-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mongodb-lab13-demo:1.0.0
+    entrypoint: ["python"]
+    command: ["scripts/init-replica-set.py"]
+    environment:
+      MONGODB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGODB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+      MONGODB_EXPORTER_USERNAME: ${MONGO_EXPORTER_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGODB_EXPORTER_PASSWORD: ${MONGO_EXPORTER_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    restart: "no"
+    profiles: ["init"]
+
+  client:
+    image: mongodb-lab13-demo:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:?Run scripts/Initialize-Lab.ps1 first}:${MONGO_ROOT_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}@mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0&authSource=admin&retryWrites=true
+    depends_on:
+      mongo1:
+        condition: service_healthy
+    profiles: ["client"]
+
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      mongo-exporter:
+        condition: service_started
+    profiles: ["monitoring"]
+
+  mongo-exporter:
+    image: percona/mongodb_exporter:${MONGO_EXPORTER_VERSION:-0.44.0}
+    environment:
+      MONGODB_URI: mongodb://mongo1:27017,mongo2:27017,mongo3:27017/admin?replicaSet=rs0
+      MONGODB_USER: ${MONGO_EXPORTER_USERNAME:?Run scripts/Initialize-Lab.ps1 first}
+      MONGODB_PASSWORD: ${MONGO_EXPORTER_PASSWORD:?Run scripts/Initialize-Lab.ps1 first}
+    command: ["--mongodb.uri=mongodb://mongo1:27017,mongo2:27017,mongo3:27017/admin?replicaSet=rs0", "--no-mongodb.direct-connect", "--collect-all"]
+    ports:
+      - "127.0.0.1:9216:9216"
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    profiles: ["monitoring"]
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
+  mongo-keyfile:

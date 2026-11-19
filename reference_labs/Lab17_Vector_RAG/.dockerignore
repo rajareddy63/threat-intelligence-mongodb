@@ -1,0 +1,7 @@
+.env
+.git
+.venv
+__pycache__
+*.py[cod]
+benchmark_results.json
+Exercise_17_Submission.pdf

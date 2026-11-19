@@ -1,0 +1,97 @@
+services:
+  configsvr:
+    image: mongo:7.0
+    container_name: lab11-configsvr
+    command: ["mongod", "--configsvr", "--replSet", "configReplSet", "--port", "27019", "--bind_ip_all"]
+    volumes:
+      - config_data:/data/db
+    networks: [lab11net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27019", "--quiet", "--eval", "db.adminCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  shard1:
+    image: mongo:7.0
+    container_name: lab11-shard1
+    command: ["mongod", "--shardsvr", "--replSet", "shard1ReplSet", "--port", "27018", "--bind_ip_all"]
+    volumes:
+      - shard1_data:/data/db
+    networks: [lab11net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27018", "--quiet", "--eval", "db.adminCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  shard2:
+    image: mongo:7.0
+    container_name: lab11-shard2
+    command: ["mongod", "--shardsvr", "--replSet", "shard2ReplSet", "--port", "27018", "--bind_ip_all"]
+    volumes:
+      - shard2_data:/data/db
+    networks: [lab11net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27018", "--quiet", "--eval", "db.adminCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mongos:
+    image: mongo:7.0
+    container_name: lab11-mongos
+    command: ["mongos", "--configdb", "configReplSet/configsvr:27019", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    depends_on:
+      configsvr:
+        condition: service_healthy
+      shard1:
+        condition: service_healthy
+      shard2:
+        condition: service_healthy
+    networks: [lab11net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  init:
+    image: mongo:7.0
+    container_name: lab11-init
+    depends_on:
+      mongos:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/scripts:ro
+    entrypoint: ["/bin/bash", "/scripts/initialize_cluster.sh"]
+    networks: [lab11net]
+    restart: "no"
+
+  lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USERNAME:-yourdockerhubusername}/mongodb-lab11:1.0
+    container_name: lab11-python
+    depends_on:
+      mongos:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongos:27017
+      DB_NAME: lab11
+      DOC_COUNT: "10000"
+    networks: [lab11net]
+    profiles: ["lab"]
+    command: ["python", "scripts/run_all.py"]
+
+networks:
+  lab11net:
+    driver: bridge
+
+volumes:
+  config_data:
+  shard1_data:
+  shard2_data:

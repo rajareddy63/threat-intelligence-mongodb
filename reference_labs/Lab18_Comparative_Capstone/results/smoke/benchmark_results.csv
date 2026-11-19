@@ -1,0 +1,13 @@
+database,workload,median_latency_ms,median_insert_throughput_records_per_second,successful_runs,requested_runs,dataset_records,status
+mongodb,threat_history,5.152,,10,10,1000,measured
+mongodb,target_and_spread,5.906,,10,10,1000,measured
+mongodb,daily_volume,5.48,,10,10,1000,measured
+mongodb,insert_throughput,,,0,10,1000,unavailable
+cassandra,threat_history,20.419,,10,10,1000,measured
+cassandra,target_and_spread,29.081,,10,10,1000,measured
+cassandra,daily_volume,15.95,,10,10,1000,measured
+cassandra,insert_throughput,,435.96,10,10,1000,measured
+neo4j,threat_history,46.978,,10,10,1000,measured
+neo4j,target_and_spread,83.38,,10,10,1000,measured
+neo4j,daily_volume,94.729,,10,10,1000,measured
+neo4j,insert_throughput,,,0,10,1000,ValueError: Values of type <class 'bson.objectid.ObjectId'> are not supported

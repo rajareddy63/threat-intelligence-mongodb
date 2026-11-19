@@ -1,0 +1,22 @@
+{
+  "engine": "FAISS CPU benchmark; MongoDB stores source documents and embeddings",
+  "similarity": "cosine (vectors are L2-normalized; FAISS inner product is equivalent)",
+  "indexes": [
+    {
+      "name": "hnsw_cosine",
+      "type": "HNSW",
+      "M": 16,
+      "efConstruction": 64,
+      "metric": "cosine",
+      "faiss_metric": "METRIC_INNER_PRODUCT"
+    },
+    {
+      "name": "ivf_cosine",
+      "type": "IVF_FLAT",
+      "nlist": 100,
+      "metric": "cosine",
+      "faiss_metric": "METRIC_INNER_PRODUCT",
+      "nprobe": 10
+    }
+  ]
+}

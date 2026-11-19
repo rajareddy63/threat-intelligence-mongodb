@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CTI Digest Intelligence Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 p-6 font-sans">
+  <div class="max-w-6xl mx-auto space-y-6">
+    <header class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold text-cyan-400">CTI Digest Intelligence Platform</h1>
+        <p class="text-xs text-slate-400">Chapter 7 MongoDB Schema & WiredTiger Cache Monitor</p>
+      </div>
+      <div id="metricsBar" class="text-xs bg-slate-900 border border-slate-800 px-4 py-2 rounded font-mono text-emerald-400">Loading metrics...</div>
+    </header>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-slate-900 p-4 rounded border border-slate-800 space-y-3">
+        <h2 class="font-semibold text-cyan-300 text-sm">Classify & Ingest Threat</h2>
+        <input id="tTitle" placeholder="Threat Title" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm" />
+        <select id="tSrc" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm">
+          <option value="src_001">CISA KEV (Verified)</option>
+          <option value="src_002">CTI Digest Tracker (Verified)</option>
+          <option value="src_003">Darkweb Paste (Unverified)</option>
+        </select>
+        <textarea id="tSum" rows="3" placeholder="Summary / TTPs" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm"></textarea>
+        <input id="tCves" placeholder="CVEs (comma separated)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm" />
+        <input id="tIocs" placeholder="IoCs (comma separated)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm" />
+        <button onclick="ingest()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded text-sm font-semibold">Classify & Store</button>
+      </div>
+      <div class="md:col-span-2 bg-slate-900 p-4 rounded border border-slate-800 space-y-3">
+        <div class="flex flex-wrap gap-2">
+          <input id="q" onkeyup="load()" placeholder="Search keyword, CVE, IoC..." class="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-sm" />
+          <select id="cls" onchange="load()" class="bg-slate-950 border border-slate-700 rounded p-2 text-sm">
+            <option value="All">All Classifications</option>
+            <option value="Ransomware">Ransomware</option>
+            <option value="Malware / Phishing">Malware / Phishing</option>
+            <option value="Vulnerability Exploitation">Vulnerability Exploitation</option>
+            <option value="Unverified Noise">Unverified Noise</option>
+          </select>
+          <label class="text-xs flex items-center gap-1 bg-slate-950 px-3 rounded border border-slate-700">
+            <input id="actOnly" type="checkbox" onchange="load()" /> Verified Actual Threats Only
+          </label>
+        </div>
+        <div id="list" class="space-y-2 max-h-[480px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    async function load() {
+      const p = new URLSearchParams({ q: document.getElementById("q").value, classification: document.getElementById("cls").value, only_actual: document.getElementById("actOnly").checked });
+      const r = await (await fetch("/api/threats?" + p)).json();
+      document.getElementById("list").innerHTML = r.results.map(x => `
+        <div class="bg-slate-950 border border-slate-800 p-3 rounded">
+          <div class="flex justify-between text-sm font-semibold"><span>${x.title}</span><span class="text-cyan-400">${x.classification} (${x.severity})</span></div>
+          <p class="text-xs text-slate-400 mt-1">${x.summary}</p>
+        </div>`).join("");
+    }
+    async function ingest() {
+      await fetch("/api/threats/classify", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          title: document.getElementById("tTitle").value,
+          source_id: document.getElementById("tSrc").value,
+          summary: document.getElementById("tSum").value,
+          cves: document.getElementById("tCves").value.split(",").map(s=>s.trim()).filter(Boolean),
+          iocs: document.getElementById("tIocs").value.split(",").map(s=>s.trim()).filter(Boolean)
+        })
+      });
+      load(); loadMetrics();
+    }
+    async function loadMetrics() {
+      const m = await (await fetch("/api/metrics")).json();
+      document.getElementById("metricsBar").textContent = `Avg BSON: ${m.avg_bson_bytes} B | WT Hit Ratio: ${m.wt_hit_ratio_pct}% | Cache: ${m.wt_used_mb}/${m.wt_max_mb} MB`;
+    }
+    load(); loadMetrics(); setInterval(loadMetrics, 10000);
+  </script>
+</body>
+</html>

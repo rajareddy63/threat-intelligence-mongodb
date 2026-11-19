@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-replica-set-init
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app: mongo-replica-set-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: initialize
+          image: mongo:7.0
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-auth
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-auth
+                  key: password
+          command: ["sh", "-ec"]
+          args:
+            - |
+              uri="mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-0.mongo:27017/admin?authSource=admin&directConnection=true"
+              until mongosh "$uri" --quiet --eval 'db.adminCommand({ping:1}).ok' >/dev/null 2>&1; do sleep 3; done
+              for peer in mongo-1.mongo mongo-2.mongo; do
+                peer_uri="mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${peer}:27017/admin?authSource=admin&directConnection=true"
+                until mongosh "$peer_uri" --quiet --eval 'db.adminCommand({ping:1}).ok' >/dev/null 2>&1; do sleep 3; done
+              done
+              mongosh "$uri" --quiet --eval '
+                try {
+                  rs.status();
+                  print("Replica set already initialized.");
+                } catch (e) {
+                  if (e.code !== 94 && e.codeName !== "NotYetInitialized") throw e;
+                  rs.initiate({
+                    _id: "rs0",
+                    members: [
+                      {_id: 0, host: "mongo-0.mongo:27017"},
+                      {_id: 1, host: "mongo-1.mongo:27017"},
+                      {_id: 2, host: "mongo-2.mongo:27017"}
+                    ]
+                  });
+                }
+              '
+              mongosh "$uri" --quiet --eval '
+                const deadline = Date.now() + 300000;
+                while (Date.now() < deadline) {
+                  try {
+                    const members = rs.status().members || [];
+                    const primary = members.filter(m => m.stateStr === "PRIMARY").length;
+                    const secondaries = members.filter(m => m.stateStr === "SECONDARY").length;
+                    printjson(members.map(m => ({name: m.name, state: m.stateStr})));
+                    if (primary === 1 && secondaries === 2) quit(0);
+                  } catch (e) {
+                    if (![94, 189, 10107, 11602].includes(e.code)) throw e;
+                  }
+                  sleep(3000);
+                }
+                print("Timed out waiting for one primary and two secondaries.");
+                quit(1);
+              '
+  ttlSecondsAfterFinished: 86400

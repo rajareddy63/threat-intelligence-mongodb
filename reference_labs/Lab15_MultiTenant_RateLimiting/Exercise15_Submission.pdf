@@ -1,0 +1,226 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 2118 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+13 TL
+(Exercise 15: MongoDB Multi-Tenant SaaS) Tj
+T*
+() Tj
+T*
+(This project demonstrates shared-collection tenant isolation, database-backed) Tj
+T*
+(rate limiting, and a safe migration to a dedicated database for one tenant.) Tj
+T*
+(It is an original implementation based on the Chapter 15 lab objectives.) Tj
+T*
+() Tj
+T*
+(Files) Tj
+T*
+() Tj
+T*
+(  - lab_01_multitenant_api.py ? task create/list/update operations; every task) Tj
+T*
+(  query is scoped by tenant_id. Updates require both _id and tenant_id.) Tj
+T*
+(  - lab_02_tenant_migration.py ? dry-run, idempotent migration, and rollback.) Tj
+T*
+(  Migration copies data and never deletes the shared source documents.) Tj
+T*
+(  - demo_runner.py ? exercises tenant isolation, rate limiting, and repeated) Tj
+T*
+(  migration against a MongoDB instance.) Tj
+T*
+(  - generate_submission_pdf.py ? creates the submission PDF from this README) Tj
+T*
+(  using only the Python standard library.) Tj
+T*
+() Tj
+T*
+(Run locally) Tj
+T*
+() Tj
+T*
+(Python 3.10+ and MongoDB are required. Install dependencies:) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(python -m pip install -r requirements.txt) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(Set MONGODB_URI if MongoDB is not available at the local default, then run:) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(python demo_runner.py) Tj
+T*
+(python -m unittest discover -s tests -v) Tj
+T*
+(python generate_submission_pdf.py) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(The demo creates records for demo-acme and demo-globex in saas_app, then) Tj
+T*
+(copies demo-acme records to tenant_demo-acme. It intentionally does not) Tj
+T*
+(delete demo data.) Tj
+T*
+() Tj
+T*
+(Migration commands) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(python lab_02_tenant_migration.py --tenant customer-42 --dry-run) Tj
+T*
+(python lab_02_tenant_migration.py --tenant customer-42) Tj
+T*
+(python lab_02_tenant_migration.py --tenant customer-42 --rollback) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(The source is saas_app.tasks by default. Migration upserts on the stable) Tj
+T*
+(task_key generated when a task is created. If a source record lacks that key,) Tj
+T*
+(the migration stops before writing it. Rollback drops only) Tj
+T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 1577 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+13 TL
+(tenant_<tenant-id>; source data remains intact.) Tj
+T*
+() Tj
+T*
+(Docker) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(docker build -t exercise15-multitenant:local .) Tj
+T*
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+T*
+(exercise15-multitenant:local) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(The image starts demo_runner.py. To run a migration command instead:) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(docker run --rm -e MONGODB_URI=mongodb://host.docker.internal:27017) Tj
+T*
+(exercise15-multitenant:local \\) Tj
+T*
+(  lab_02_tenant_migration.py --tenant customer-42 --dry-run) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(Tenant isolation and rate limiting) Tj
+T*
+() Tj
+T*
+(The shared tasks collection stores a tenant_id on each record. list_tasks) Tj
+T*
+(filters by that ID, and update_task uses the combined filter) Tj
+T*
+({"_id": task_id, "tenant_id": tenant_id}. A task identifier from one tenant) Tj
+T*
+(therefore cannot be used to update another tenant's task.) Tj
+T*
+() Tj
+T*
+(Rate-limit counters are atomically incremented in MongoDB using one document) Tj
+T*
+(per tenant and fixed time window. The configurable default is 100 requests per) Tj
+T*
+(60 seconds. This is intentionally a modest-precision limiter, not a substitute) Tj
+T*
+(for a distributed gateway in high-throughput production systems.) Tj
+T*
+() Tj
+T*
+(Tests) Tj
+T*
+() Tj
+T*
+(The unit tests use mocked MongoDB collections and require no running server:) Tj
+T*
+() Tj
+T*
+(`sh) Tj
+T*
+(python -m unittest discover -s tests -v) Tj
+T*
+(`) Tj
+T*
+() Tj
+T*
+(Assignment reference: Chapter 15 lab description.) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000002493 00000 n 
+0000002619 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+4248
+%%EOF

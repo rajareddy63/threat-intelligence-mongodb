@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "thr_2026_001",
+    "title": "Qilin Ransomware Campaign Exploiting Edge VPN Appliances",
+    "classification": "Ransomware",
+    "severity": "Critical",
+    "source": {
+      "source_id": "src_002",
+      "name": "CTI Digest Ransomware Tracker",
+      "reliability_score": 0.92,
+      "verified": true,
+      "is_actual_threat": true
+    }
+  }
+]
